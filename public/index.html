@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MarsGuard — Centro de control</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="plate">MG-01</span>
+        <h1>MARS<span>/</span>GUARD</h1>
+      </div>
+      <p class="mission-id">Misión <strong>ARES-01</strong></p>
+      <p class="link" id="link-state" data-state="WAITING">En espera</p>
+      <p class="ops">
+        <span class="ops-lamp" id="ops-lamp"></span>
+        <span id="ops-label">Sistema operativo</span>
+      </p>
+      <time id="local-clock" datetime="">--:--:--</time>
+    </header>
+
+    <main>
+      <section class="panel telemetry" id="telemetry-panel" aria-labelledby="telemetry-title">
+        <div class="panel-head">
+          <p class="index">01</p>
+          <h2 id="telemetry-title">Telemetría del rover</h2>
+          <p class="systems" id="systems-chip">Sistemas sin lectura</p>
+        </div>
+
+        <p class="banner" id="telemetry-banner" hidden></p>
+
+        <div class="readouts">
+          <article class="readout">
+            <h3>Batería</h3>
+            <p class="value"><span id="battery-value">—</span><small>%</small></p>
+            <div class="meter" aria-hidden="true"><span id="battery-meter"></span></div>
+          </article>
+          <article class="readout">
+            <h3>Temperatura</h3>
+            <p class="value"><span id="temperature-value">—</span><small>°C</small></p>
+            <p class="hint">Exterior</p>
+          </article>
+          <article class="readout">
+            <h3>Señal</h3>
+            <p class="value"><span id="signal-value">—</span><small>%</small></p>
+            <div class="meter" aria-hidden="true"><span id="signal-meter"></span></div>
+          </article>
+          <article class="readout">
+            <h3>Velocidad</h3>
+            <p class="value"><span id="speed-value">—</span><small>m/s</small></p>
+            <p class="hint">Desplazamiento</p>
+          </article>
+          <article class="readout readout-wide">
+            <h3>Coordenadas</h3>
+            <div class="coords">
+              <p><span>X</span><strong id="coord-x">—</strong></p>
+              <p><span>Y</span><strong id="coord-y">—</strong></p>
+              <svg id="coord-map" viewBox="0 0 100 72" role="img" aria-label="Posición relativa del rover">
+                <rect x="1" y="1" width="98" height="70"></rect>
+                <path d="M50 6 V66 M8 36 H92"></path>
+                <circle id="coord-dot" cx="50" cy="36" r="3.2"></circle>
+              </svg>
+            </div>
+          </article>
+          <article class="readout">
+            <h3>Última transmisión</h3>
+            <p class="stamp" id="transmitted-at">Sin transmisión</p>
+            <p class="hint" id="source-label">Consulta manual</p>
+          </article>
+        </div>
+
+        <figure class="trace">
+          <figcaption>Evolución de la batería en lecturas en vivo</figcaption>
+          <svg id="battery-trace" viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="Evolución reciente de la batería">
+            <path id="battery-line" d=""></path>
+          </svg>
+        </figure>
+      </section>
+
+      <section class="panel breaker" aria-labelledby="breaker-title">
+        <div class="panel-head">
+          <p class="index">02</p>
+          <h2 id="breaker-title">Monitor del Circuit Breaker</h2>
+        </div>
+
+        <ol class="state-track" id="state-track">
+          <li data-state="CLOSED">
+            <span class="node-lamp"></span>
+            <strong>CLOSED</strong>
+            <span>Operativo</span>
+          </li>
+          <li data-state="OPEN">
+            <span class="node-lamp"></span>
+            <strong>OPEN</strong>
+            <span>Protección activada</span>
+          </li>
+          <li data-state="HALF_OPEN">
+            <span class="node-lamp"></span>
+            <strong>HALF_OPEN</strong>
+            <span>Verificando conexión</span>
+          </li>
+        </ol>
+
+        <dl class="stats">
+          <div>
+            <dt>Estado actual</dt>
+            <dd id="stat-state">—</dd>
+          </div>
+          <div>
+            <dt>Errores consecutivos</dt>
+            <dd id="stat-failures">0 / 3</dd>
+          </div>
+          <div>
+            <dt>Solicitudes bloqueadas</dt>
+            <dd id="stat-blocked">0</dd>
+          </div>
+          <div>
+            <dt>Solicitudes al servicio remoto</dt>
+            <dd id="stat-remote">0</dd>
+          </div>
+          <div>
+            <dt>Recuperación</dt>
+            <dd id="stat-recovery">No requerida</dd>
+          </div>
+          <div>
+            <dt>Último cambio</dt>
+            <dd id="stat-change">Estado inicial</dd>
+          </div>
+          <div>
+            <dt>Aciertos / fallos</dt>
+            <dd id="stat-totals">0 / 0</dd>
+          </div>
+          <div>
+            <dt>Último evento</dt>
+            <dd id="stat-event">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel simulation" aria-labelledby="simulation-title">
+        <div class="panel-head">
+          <p class="index">03</p>
+          <h2 id="simulation-title">Centro de simulación</h2>
+        </div>
+        <div class="commands">
+          <button type="button" id="btn-telemetry" class="command">
+            <strong>Consultar telemetría</strong>
+            <small>Una lectura real, a través del Circuit Breaker.</small>
+          </button>
+          <button type="button" id="btn-fail" class="command">
+            <strong>Simular pérdida de comunicación</strong>
+            <small>El rover responde HTTP 503.</small>
+          </button>
+          <button type="button" id="btn-timeout" class="command">
+            <strong>Simular respuesta lenta</strong>
+            <small>El rover tarda 3 s. El circuito espera 1,5 s.</small>
+          </button>
+          <button type="button" id="btn-recover" class="command">
+            <strong>Restaurar comunicación</strong>
+            <small>Reactiva el rover. No cierra el circuito.</small>
+          </button>
+          <button type="button" id="btn-reset" class="command command-quiet">
+            <strong>Reiniciar demostración</strong>
+            <small>Borra contadores, caché y el modo del rover.</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel console" aria-labelledby="events-title">
+        <div class="panel-head">
+          <p class="index">04</p>
+          <h2 id="events-title">Registro de eventos</h2>
+        </div>
+        <div class="event-log" id="event-log" tabindex="0"></div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
