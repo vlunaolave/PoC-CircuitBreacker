@@ -1,0 +1,20 @@
+{
+  "name": "marsguard",
+  "version": "1.0.0",
+  "description": "MarsGuard: laboratorio de resiliencia con un Circuit Breaker propio entre Mission Control y el rover ARES-01.",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "start": "node scripts/dev.js",
+    "start:mission": "node src/mission-control/server.js",
+    "start:rover": "node src/rover-service/server.js",
+    "test": "node --test tests/circuit-breaker.test.js tests/integration.test.js"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "express": "^4.21.2"
+  }
+}
